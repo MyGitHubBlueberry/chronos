@@ -1,0 +1,155 @@
+Table Users {
+  id integer [pk, increment]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  name varchar(100) [not null]
+  timezone varchar(64)
+  profile_picture_url varchar(2048)
+  created_at datetime
+  updated_at datetime
+}
+
+Table Calendars {
+  id integer [pk, increment]
+  owner_id integer [not null]
+  title varchar(200) [not null]
+  description text
+  color varchar(7)
+  is_default boolean [default: false]
+  is_holiday_calendar boolean [default: false]
+  created_at datetime
+  updated_at datetime
+}
+
+Table CalendarUsers {
+  id integer [pk, increment]
+  calendar_id integer [not null]
+  user_id integer [not null]
+  joined_at datetime
+
+  indexes {
+    (calendar_id, user_id) [unique]
+  }
+}
+
+Table CalendarPermissions {
+  id integer [pk, increment]
+  member_id integer [not null, unique]
+
+  can_view_events boolean [not null, default: true]
+  can_create_events boolean [not null, default: false]
+
+  can_edit_own_events boolean [not null, default: false]
+  can_edit_all_events boolean [not null, default: false]
+
+  can_delete_own_events boolean [not null, default: false]
+  can_delete_all_events boolean [not null, default: false]
+
+  can_invite_users boolean [not null, default: false]
+  can_manage_members boolean [not null, default: false]
+  can_edit_calendar boolean [not null, default: false]
+
+  updated_at datetime
+}
+
+Table Events {
+  id integer [pk, increment]
+  calendar_id integer [not null]
+  author_id integer [not null]
+  title varchar(200) [not null]
+  description text
+  type event_type [not null]
+  start_at datetime [not null]
+  end_at datetime
+  is_all_day boolean [default: false]
+  color varchar(7)
+  task_status task_status
+  recurrence_id integer [unique]
+  created_at datetime
+  updated_at datetime
+}
+
+Table RecurrenceRules {
+  id integer [pk, increment]
+  frequency recurrence_frequency [not null]
+  interval integer [not null, default: 1]
+  days_of_week varchar
+  day_of_month integer
+  start_at datetime
+  until_at datetime
+}
+
+Table EventModification {
+  id integer [pk, increment]
+  event_id integer [not null]
+  original_start_at datetime [not null]
+  exception_type exception_type [not null]
+  new_start_at datetime
+  new_end_at datetime
+  new_title varchar(200)
+  new_description text
+  created_at datetime
+
+  indexes {
+    (event_id, original_start_at) [unique]
+  }
+}
+
+Table Invitations {
+  id integer [pk, increment]
+  calendar_id integer [not null]
+  invited_by integer [not null]
+  invited_email varchar(255) [not null]
+  status invitation_status [default: 'pending']
+  token_hash varchar(100) [unique]
+  expires_at datetime
+  created_at datetime
+}
+
+Enum event_type {
+  arrangement
+  reminder
+  task
+}
+
+Enum invitation_status {
+  pending
+  accepted
+  declined
+  expired
+}
+
+Enum recurrence_frequency {
+  daily
+  weekly
+  monthly
+  yearly
+}
+
+Enum exception_type {
+  cancelled
+  modified
+}
+
+Enum task_status {
+  todo
+  in_progress
+  completed
+}
+
+Ref: Users.id < Calendars.owner_id
+
+Ref: Users.id < CalendarUsers.user_id
+Ref: Calendars.id < CalendarUsers.calendar_id
+
+Ref: CalendarUsers.id - CalendarPermissions.member_id
+
+Ref: Calendars.id < Events.calendar_id
+Ref: Users.id < Events.author_id
+
+Ref: RecurrenceRules.id - Events.recurrence_id
+
+Ref: Events.id < EventModification.event_id
+
+Ref: Users.id < Invitations.invited_by
+Ref: Calendars.id < Invitations.calendar_id
