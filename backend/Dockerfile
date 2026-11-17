@@ -1,5 +1,5 @@
 FROM node:22-slim
-WORKDIR /chronos/backend
+WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
