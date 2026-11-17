@@ -1,5 +1,6 @@
-const express = require("express");
-const mongoose = require("mongoose");
+import express from "express";
+import mongoose from "mongoose";
+import { appConfig } from "./config/app.js";
 
 const app = express();
 const PORT = 3000;
@@ -13,16 +14,19 @@ mongoose.connection.on("error", (error) => {
 });
 
 async function start() {
-  if (!process.env.MONGO_USERNAME || !process.env.MONGO_PASSWORD) {
-    throw new Error("MONGO_USERNAME and MONGO_PASSWORD are required");
+  if (!appConfig.mongoRootUser || !appConfig.mongoRootPassword) {
+    throw new Error("MONGO_ROOT_USERNAME and MONGO_ROOT_PASSWORD are required");
   }
 
-  await mongoose.connect(process.env.MONGO_URI, {
-    user: process.env.MONGO_USERNAME,
-    pass: process.env.MONGO_PASSWORD,
-    authSource: "admin",
-    serverSelectionTimeoutMS: 10000,
-  });
+  await mongoose.connect(
+    appConfig.mongoUrlDocker || appConfig.mongoUrlWindows,
+    {
+      user: appConfig.mongoRootUser,
+      pass: appConfig.mongoRootPassword,
+      authSource: "admin",
+      serverSelectionTimeoutMS: 10000,
+    }
+  );
 
   console.log("MongoDB connected");
 

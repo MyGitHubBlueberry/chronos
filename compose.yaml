@@ -6,9 +6,9 @@ services:
       - "3000:3000"
     command: npm start
     environment:
-      MONGO_URI: "mongodb://mongodb:27017/chronos"
-      MONGO_USERNAME: "${MONGO_ROOT_USERNAME}"
-      MONGO_PASSWORD: "${MONGO_ROOT_PASSWORD}"
+      MONGO_URL_DOCKER: "mongodb://mongodb:27017/chronos"
+      MONGO_ROOT_USERNAME: "${MONGO_ROOT_USERNAME}"
+      MONGO_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
     depends_on:
       - mongodb
   
@@ -17,6 +17,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: "${MONGO_ROOT_USERNAME}"
       MONGO_INITDB_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
+    ports:
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongodb_data:/data/db
 
