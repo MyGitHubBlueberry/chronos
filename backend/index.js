@@ -1,9 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import { appConfig } from "./config/app.js";
+import { dbConfig } from "./config/database.js";
 
 const app = express();
-const PORT = 3000;
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", app: "app is OK" });
@@ -14,15 +14,15 @@ mongoose.connection.on("error", (error) => {
 });
 
 async function start() {
-  if (!appConfig.mongoRootUser || !appConfig.mongoRootPassword) {
+  if (!dbConfig.mongoRootUser || !dbConfig.mongoRootPassword) {
     throw new Error("MONGO_ROOT_USERNAME and MONGO_ROOT_PASSWORD are required");
   }
 
   await mongoose.connect(
-    appConfig.mongoUrlDocker || appConfig.mongoUrlWindows,
+    dbConfig.mongoUrlDocker || dbConfig.mongoUrlWindows,
     {
-      user: appConfig.mongoRootUser,
-      pass: appConfig.mongoRootPassword,
+      user: dbConfig.mongoRootUser,
+      pass: dbConfig.mongoRootPassword,
       authSource: "admin",
       serverSelectionTimeoutMS: 10000,
     }
@@ -30,7 +30,7 @@ async function start() {
 
   console.log("MongoDB connected");
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(appConfig.port, "0.0.0.0", () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 }
