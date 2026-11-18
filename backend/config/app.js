@@ -1,9 +1,5 @@
-import dotenv from "dotenv";
-
-dotenv.config({
-  path: new URL("../../.env", import.meta.url),
-});
+import "./env.js";
 
 export const appConfig = {
-    port: process.env.API_PORT,
+    port: Number(process.env.API_PORT),
 }
