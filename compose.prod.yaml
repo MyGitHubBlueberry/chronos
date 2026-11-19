@@ -1,0 +1,10 @@
+services:
+  backend:
+    build:
+      target: prod
+
+  frontend:
+    build:
+      target: prod
+    ports: !override
+      - "5173:80"
