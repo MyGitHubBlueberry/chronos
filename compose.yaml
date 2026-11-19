@@ -1,18 +1,40 @@
 services:
   backend:
-    image: "chronos-api:v1"
-    build: ./backend
+    build:
+      context: ./
+      target: backend-dev
     ports:
       - "3000:3000"
-    command: npm start
     environment:
       API_PORT: "3000"
       MONGO_URL: "mongodb://mongodb:27017/chronos"
       MONGO_ROOT_USERNAME: "${MONGO_ROOT_USERNAME}"
       MONGO_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
+    develop:
+      watch:
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/
+          action: sync
+          target: /usr/local/app
     depends_on:
-      - mongodb
-  
+      mongodb:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./
+      target: frontend-dev
+    ports:
+      - "5173:5173"
+    develop:
+      watch:
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/
+          action: sync
+          target: /usr/local/app
+
   mongodb:
     image: mongo:9.0
     environment:
@@ -22,6 +44,11 @@ services:
       - "127.0.0.1:27017:27017"
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mongodb_data:
