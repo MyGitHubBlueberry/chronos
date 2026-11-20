@@ -5,6 +5,7 @@ const ModelNames = Object.freeze({
     Category: 'Category',
     Invitation: 'Invitation',
     EventModification: 'EventModification',
+    RefreshToken: 'RefreshToken',
 });
 
 export default ModelNames;

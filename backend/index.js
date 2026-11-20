@@ -4,6 +4,11 @@ import { connectDatabase } from "./database/connect.js";
 
 const app = express();
 
+app.use(cors({ origin: `http://localhost:${process.env.CLIENT_PORT}` }));
+app.use(express.json());
+
+app.use('/api/auth', authRouter);
+
 app.get("/health", (req, res) => {
   res.json({ status: "ok", app: "app is OK" });
 });

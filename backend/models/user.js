@@ -3,19 +3,25 @@ const { Schema } = mongoose;
 
 import ModelNames from './modelNames.js';
 
+//todo: maybe add validator functions
 const userSchema = new Schema({
     display_name: { type: String, required: true },
     login: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password_hash: { type: String, required: true },
+    is_email_confirmed: { type: Boolean, default: false },
+    email_verification_token: { type: String, default: null },
+    password_reset_token: { type: String, default: null },
+    password_reset_token_expires: { type: Date, default: null },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
+
     country_code: String,
     timezone: String,
     profile_picture_url: String,
 });
 
-userSchema.pre('findOneAndDelete', async function () {
+userSchema.pre('findOneAndDelete', async function() {
     const user = await this.model.findOne(this.getFilter());
     if (!user) return;
 
