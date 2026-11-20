@@ -35,7 +35,21 @@ const calendarSchema = new Schema({
     is_holiday: { type: Boolean, default: false }, //can't delete
     is_hidden: { type: Boolean, default: false },
 });
-    // todo: methods
-    // todo: make virtual method can_delete() and use is_default and is_holiday there
+
+calendarSchema.methods.is_delitable = function() {
+    return !this.is_default && !this.is_holiday;
+}
+
+calendarSchema.pre('findOneAndDelete', async function () {
+    const calendar = await this.model.findOne(this.getFilter());
+    if (!calendar) return;
+
+    const Event = mongoose.model(ModelNames.Event);
+    const events = await Event.find({ calendar: calendar._id }, '_id');
+    await mongoose.model(ModelNames.EventModification).deleteMany({ event: { $in: events.map((e) => e._id) } });
+    await Event.deleteMany({ calendar: calendar._id });
+    await mongoose.model(ModelNames.Category).deleteMany({ calendar: calendar._id });
+    await mongoose.model(ModelNames.Invitation).deleteMany({ calendar: calendar._id });
+});
 
 export default mongoose.model(ModelNames.Calendar, calendarSchema);

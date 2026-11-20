@@ -4,19 +4,6 @@ const { Schema } = mongoose;
 import ModelNames from './modelNames.js';
 import EventTypes from './eventTypes.js';
 
-const eventSchema = new Schema({
-    title: { type: String, required: true },
-    description: String,
-    calendar: { type: Schema.Types.ObjectId, ref: ModelNames.Calendar, required: true },
-    author: { type: Schema.Types.ObjectId, ref: ModelNames.User, required: true },
-    start_at: { type: Date, required: true },
-    end_at: Date,
-    is_all_day: { type: Boolean, default: false },
-    color: String,
-    category: { type: Schema.Types.ObjectId, ref: ModelNames.Category },
-    recurrence: recurrenceSchema,
-}, { discriminatorKey: 'type' });
-
 const weekdayOrdinals = ['first', 'second', 'third', 'fourth', 'fifth', 'last'];
 
 const recurrenceSchema = new Schema({
@@ -54,6 +41,30 @@ const recurrenceSchema = new Schema({
     },
 }, { _id: false });
 
+const eventSchema = new Schema({
+    title: { type: String, required: true },
+    description: String,
+    calendar: { type: Schema.Types.ObjectId, ref: ModelNames.Calendar, required: true },
+    author: { type: Schema.Types.ObjectId, ref: ModelNames.User, required: true },
+    start_at: { type: Date, required: true },
+    end_at: Date,
+    is_all_day: { type: Boolean, default: false },
+    color: String,
+    category: { type: Schema.Types.ObjectId, ref: ModelNames.Category },
+    recurrence: recurrenceSchema,
+    attendees: [{ type: Schema.Types.ObjectId, ref: ModelNames.User, required: true }],
+}, { discriminatorKey: 'type' });
+
+eventSchema.index({ calendar: 1, start_at: 1 });
+
+eventSchema.pre('findOneAndDelete', async function () {
+    const event = await this.model.findOne(this.getFilter());
+    if (!event) return;
+
+    await mongoose.model(ModelNames.EventModification).deleteMany({ event: event._id });
+    await mongoose.model(ModelNames.Invitation).deleteMany({ event: event._id });
+});
+
 const Event = mongoose.model(ModelNames.Event, eventSchema);
 
 const Arrangement = Event.discriminator(EventTypes.Arrangement, new Schema({
@@ -76,7 +87,7 @@ const Reminder = Event.discriminator(EventTypes.Reminder, new Schema({
         type: String,
         enum: ['minutes', 'hours', 'days'],
     },
-    last_notified_at: Date, // start time of the most recent occurrence already notified; unset = never fired
+    last_notified_at: Date,
 }));
 
 export default Event;

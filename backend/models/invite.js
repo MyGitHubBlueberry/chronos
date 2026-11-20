@@ -14,21 +14,30 @@ const inviteSchema = new Schema({
     created_at: { type: Date, default: Date.now },
 }, { discriminatorKey: 'type' });
 
+inviteSchema.index({ calendar: 1 });
+
 const Invite = mongoose.model(ModelNames.Invite, inviteSchema);
 
-const Invitation = Invite.discriminator(InviteTypes.Invitation, new Schema({
+const invitationSchema = new Schema({
     // set when registered
     invited_user: { type: Schema.Types.ObjectId, ref: ModelNames.User },
     // set when not registered yet
     invited_email: String,
 
+    // invite to event only if set
+    event: { type: Schema.Types.ObjectId, ref: ModelNames.Event },
+
     status: { type: String, enum: ['pending', 'accepted', 'declined', 'expired'], default: 'pending' },
 
     expires_at: Date,
-}));
+});
+
+invitationSchema.index({ event: 1 });
+
+const Invitation = Invite.discriminator(InviteTypes.Invitation, invitationSchema);
 
 const JoinLink = Invite.discriminator(InviteTypes.JoinLink, new Schema({
-    expires_at: { type: Date, required: true }, // shareable links must expire
+    expires_at: { type: Date, required: true },
 }));
 
 export default Invite;

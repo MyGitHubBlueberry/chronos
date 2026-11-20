@@ -3,7 +3,8 @@ const ModelNames = Object.freeze({
     Calendar: 'Calendar',
     Event: 'Event',
     Category: 'Category',
-    Invite: 'Invite',
+    Invitation: 'Invitation',
+    EventModification: 'EventModification',
 });
 
 export default ModelNames;
