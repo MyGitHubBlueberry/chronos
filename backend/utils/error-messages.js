@@ -8,6 +8,4 @@ const ERROR_MESSAGES = Object.freeze({
     EMAIL_IN_USE: 'Login or email is already in use.'
 });
 
-module.exports = {
-    ERROR_MESSAGES,
-};
+export { ERROR_MESSAGES };

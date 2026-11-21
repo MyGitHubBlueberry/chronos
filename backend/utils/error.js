@@ -57,7 +57,7 @@ class ValidationError extends BadRequestError {
   }
 }
 
-module.exports = {
+export {
   AppError,
   BadRequestError,
   UnauthorizedError,

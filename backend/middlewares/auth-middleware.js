@@ -1,9 +1,9 @@
-const { verifyToken } = require("../utils/jwt");
-const jwt = require('jsonwebtoken');
-const { UnauthorizedError, ForbiddenError, BadRequestError } = require("../utils/error");
-const { ERROR_MESSAGES } = require('../utils/error-messages');
+import { verifyToken } from "../utils/jwt.js";
+import jwt from 'jsonwebtoken';
+import { UnauthorizedError, ForbiddenError } from "../utils/error.js";
+import { ERROR_MESSAGES } from '../utils/error-messages.js';
 
-export default authenticateToken = async function(req, res, next) {
+export default async function authenticateToken(req, res, next) {
     if (req.user) return next();
 
     const authHeader = req.headers['authorization'];
