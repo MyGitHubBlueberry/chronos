@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
+
 import { dbConfig } from "../config/database.js";
+import logger from "../utils/logger.js"
 
 mongoose.connection.on("error", (error) => {
-  console.error("MongoDB connection error:", error.message);
+  logger.error("MongoDB connection error:", error.message);
 });
 
 export async function connectDatabase() {
@@ -21,5 +23,5 @@ export async function connectDatabase() {
         serverSelectionTimeoutMS: 10000,
     });
 
-    console.log("MongoDB connected");
+    logger.info("MongoDB connected")
 }

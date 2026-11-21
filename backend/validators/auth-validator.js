@@ -5,6 +5,8 @@ const registerSchema = z.object({
     login: z.string().min(3).max(32),
     email: z.string().email(),
     password: z.string().min(8),
+    timezone: z.string(),
+    country_code: z.string(),
 });
 
 const loginSchema = z.object({
@@ -13,7 +15,7 @@ const loginSchema = z.object({
 });
 
 const jwtRefreshSchema = z.object({
-    token: z.jwt()
+    token: z.string().length(64)
 });
 
 const emailSchema = z.object({

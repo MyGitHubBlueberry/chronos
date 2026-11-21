@@ -1,4 +1,4 @@
-import { ValidationError } from "../utils/error";
+import { ValidationError } from "../utils/error.js";
 
 export default function validate(schema) {
     return function(req, res, next) {

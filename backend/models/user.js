@@ -21,6 +21,16 @@ const userSchema = new Schema({
     profile_picture_url: String,
 });
 
+userSchema.methods.getPublicFields = function() {
+    const {
+        password_hash, email_verification_token,
+        password_reset_token, password_reset_token_expires,
+        ...publicFields
+    } = this.toObject();
+
+    return publicFields;
+}
+
 userSchema.pre('findOneAndDelete', async function() {
     const user = await this.model.findOne(this.getFilter());
     if (!user) return;
