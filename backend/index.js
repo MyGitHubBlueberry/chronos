@@ -1,7 +1,7 @@
 import express from "express";
 import { appConfig } from "./config/app.js";
 import { connectDatabase } from "./database/connect.js";
-import authRouter from "./routes/auth-router.js";
+import authRouter from "./routers/auth-router.js";
 import cors from "cors";
 
 const app = express();
