@@ -2,7 +2,7 @@ import logger from '../utils/logger.js';
 
 export default function errorHandler(err, req, res, next) {
   const status = err.status || 500;
-  const logContext = { err, method: req.method, url: req.originalUrl, userId: req.user?.id || null, ip: req.ip };
+  const logContext = { err, method: req.method, path: req.route?.path, userId: req.user?.id || null, ip: req.ip };
   
   if (err.isOperational) {
     logger.warn(logContext, err.message);

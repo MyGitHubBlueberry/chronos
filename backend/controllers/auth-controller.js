@@ -3,10 +3,12 @@ import DbRefreshToken from '../models/refreshToken.js';
 import { ERROR_MESSAGES } from '../utils/error-messages.js';
 import { hash, matchHash, hashToken } from '../utils/hasher.js';
 import { generateToken } from '../utils/jwt.js';
+import { sendAuthMail } from '../services/auth-mail.js';
 import crypto from 'node:crypto'
 import { ForbiddenError, ConflictError, UnauthorizedError, BadRequestError } from '../utils/error.js';
 
 const REFRESH_TOKEN_LIFETIME_MS = 24 * 60 * 60 * 1000;
+const EMAIL_TOKEN_LIFETIME_MS = 24 * 60 * 60 * 1000;
 
 
 export default class AuthController {
@@ -26,12 +28,14 @@ export default class AuthController {
 
         user = new DbUser({
             login, email, display_name, password_hash,
-            email_verification_token, country_code, timezone
+            email_verification_token: hashToken(email_verification_token),
+            email_verification_token_expires: new Date(Date.now() + EMAIL_TOKEN_LIFETIME_MS),
+            country_code, timezone
         });
 
         await user.save();
 
-        //todo: send mail
+        await sendAuthMail(email, email_verification_token);
 
         return res.status(201).json({
             message: "User registered. " +
@@ -101,9 +105,20 @@ export default class AuthController {
         });
     }
 
-    //todo: email staff
     static async requestPasswordResetEmail(req, res) { }
-    static async requestEmailVerification(req, res) { }
+
+    static async requestEmailVerification(req, res) {
+        const token = generateRandomToken();
+        const user = await DbUser.findOneAndUpdate(
+            { email: req.body.email, is_email_confirmed: false },
+            { $set: {
+                email_verification_token: hashToken(token),
+                email_verification_token_expires: new Date(Date.now() + EMAIL_TOKEN_LIFETIME_MS),
+            } },
+        );
+        if (user) await sendAuthMail(user.email, token);
+        return res.status(202).json({ message: 'If eligible, the account will receive a verification email.' });
+    }
 
     static async confirmEmail(req, res) {
         const { confirm_token } = req.params;
@@ -112,15 +127,22 @@ export default class AuthController {
             throw new BadRequestError(ERROR_MESSAGES.EMAIL_TOKEN_MISSING);
         }
 
-        const user = await DbUser.findOne({ email_verification_token: confirm_token });
+        const user = await DbUser.findOneAndUpdate(
+            {
+                email_verification_token: hashToken(confirm_token),
+                email_verification_token_expires: { $gt: new Date() },
+                is_email_confirmed: false,
+            },
+            { $set: {
+                is_email_confirmed: true,
+                email_verification_token: null,
+                email_verification_token_expires: null,
+            } },
+        );
 
         if (!user) {
             throw new BadRequestError(ERROR_MESSAGES.EMAIL_TOKEN_ERROR);
         }
-
-        user.is_email_confirmed = true;
-        user.email_verification_token = null;
-        await user.save();
 
         return res.json({ message: "Account verified successfully." });
     }

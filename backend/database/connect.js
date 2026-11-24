@@ -4,7 +4,7 @@ import { dbConfig } from "../config/database.js";
 import logger from "../utils/logger.js"
 
 mongoose.connection.on("error", (error) => {
-  logger.error("MongoDB connection error:", error.message);
+  logger.error({ err: error }, "MongoDB connection error");
 });
 
 export async function connectDatabase() {

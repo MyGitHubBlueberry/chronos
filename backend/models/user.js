@@ -11,6 +11,7 @@ const userSchema = new Schema({
     password_hash: { type: String, required: true },
     is_email_confirmed: { type: Boolean, default: false },
     email_verification_token: { type: String, default: null },
+    email_verification_token_expires: { type: Date, default: null },
     password_reset_token: { type: String, default: null },
     password_reset_token_expires: { type: Date, default: null },
     created_at: { type: Date, default: Date.now },
@@ -23,7 +24,7 @@ const userSchema = new Schema({
 
 userSchema.methods.getPublicFields = function() {
     const {
-        password_hash, email_verification_token,
+        password_hash, email_verification_token, email_verification_token_expires,
         password_reset_token, password_reset_token_expires,
         ...publicFields
     } = this.toObject();

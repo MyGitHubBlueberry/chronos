@@ -30,6 +30,6 @@ async function start() {
 }
 
 start().catch((error) => {
-    logger.error("Failed to start application:", error.message);
+    logger.error({ err: error }, "Failed to start application");
     process.exit(1);
 });
