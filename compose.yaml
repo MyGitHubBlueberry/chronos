@@ -10,6 +10,7 @@ services:
       MONGO_URL: "mongodb://mongodb:27017/chronos"
       MONGO_ROOT_USERNAME: "${MONGO_ROOT_USERNAME}"
       MONGO_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
+      JWT_SECRET: "${JWT_SECRET:-}"
       ETHEREAL_USER: "${ETHEREAL_USER:-}"
       ETHEREAL_PASS: "${ETHEREAL_PASS:-}"
       FRONTEND_PUBLIC_URL: "${FRONTEND_PUBLIC_URL:-http://localhost:5173}"

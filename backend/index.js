@@ -22,6 +22,10 @@ app.use(errorHandler);
 
 
 async function start() {
+    if (!process.env.JWT_SECRET?.trim()) {
+        throw new Error("JWT_SECRET is required");
+    }
+
     await connectDatabase();
 
     app.listen(appConfig.port, "0.0.0.0", () => {
